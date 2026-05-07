@@ -3,7 +3,8 @@
   "private": true,
   "description": "Adult Ad Network with Compliance Scoring",
   "workspaces": [
-    "packages/*"
+    "packages/*",
+    "web"
   ],
   "scripts": {
     "build": "npm run build --workspaces --if-present",
