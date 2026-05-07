@@ -3,10 +3,15 @@
   "private": true,
   "description": "Adult Ad Network with Compliance Scoring",
   "workspaces": [
-    "packages/*"
+    "packages/*",
+    "web"
   ],
   "scripts": {
+    "build": "npm run build --workspaces --if-present",
+    "migrate": "npm run push --workspaces --if-present",
     "test": "vitest",
+    "test:performance": "k6 run tests/performance/load-test.js",
+    "test:smoke": "vitest run tests/smoke/smoke-test.ts",
     "lint": "eslint .",
     "format": "prettier --write ."
   },
@@ -15,6 +20,7 @@
     "eslint": "^8.57.0",
     "prettier": "^3.2.5",
     "vitest": "^1.6.0",
+    "drizzle-kit": "^0.21.1",
     "@typescript-eslint/eslint-plugin": "^7.8.0",
     "@typescript-eslint/parser": "^7.8.0",
     "eslint-config-prettier": "^9.1.0",

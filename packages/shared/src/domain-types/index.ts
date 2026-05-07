@@ -40,7 +40,10 @@ export function calculateOverallComplianceScore(
 
 // Age Gate Details
 export const AgeGateVerificationMethodSchema = z.enum(['crawler', 'screenshot', 'VC']);
+export type AgeGateVerificationMethod = z.infer<typeof AgeGateVerificationMethodSchema>;
+
 export const AgeGateStatusSchema = z.enum(['pending', 'verified', 'rejected']);
+export type AgeGateStatus = z.infer<typeof AgeGateStatusSchema>;
 
 export const AgeGateDetailsSchema = z.object({
   method: AgeGateVerificationMethodSchema,
@@ -49,6 +52,10 @@ export const AgeGateDetailsSchema = z.object({
   verifiedAt: TimestampSchema.optional(),
 });
 export type AgeGateDetails = z.infer<typeof AgeGateDetailsSchema>;
+
+// Consent Status
+export const ConsentStatusSchema = z.enum(['active', 'expired', 'revoked', 'disputed']);
+export type ConsentStatus = z.infer<typeof ConsentStatusSchema>;
 
 // Publisher
 export const PublisherSchema = z.object({
@@ -66,6 +73,7 @@ export type Publisher = z.infer<typeof PublisherSchema>;
 export const TargetingRulesSchema = z.object({
   minComplianceScore: z.number().min(0).max(100).default(0),
   requiredAgeGateMethods: z.array(AgeGateVerificationMethodSchema).optional(),
+  minConsentRecordStatus: ConsentStatusSchema.optional(),
   allowedCountries: z.array(z.string().length(2)).optional(), // ISO 3166-1 alpha-2
   categories: z.array(z.string()).optional(),
 });
@@ -94,11 +102,43 @@ export const ImpressionSchema = z.object({
   publisherId: IdSchema,
   timestamp: TimestampSchema,
   ipHash: z.string(), // Hashed IP for privacy
+  ip: z.string().ip().optional(), // Raw IP for fraud detection (optional in schema, but may be present)
   userAgent: z.string(),
   country: z.string().length(2).optional(),
   complianceScoreAtServe: z.number().min(0).max(100),
 });
 export type Impression = z.infer<typeof ImpressionSchema>;
+
+// Click
+export const ClickSchema = z.object({
+  id: IdSchema,
+  impressionId: IdSchema,
+  campaignId: IdSchema,
+  publisherId: IdSchema,
+  timestamp: TimestampSchema,
+  userAgent: z.string(),
+  ip: z.string().ip().optional(),
+});
+export type Click = z.infer<typeof ClickSchema>;
+
+// Fraud Signal
+export const FraudSignalSchema = z.object({
+  impressionId: IdSchema,
+  publisherId: IdSchema,
+  campaignId: IdSchema,
+  timestamp: TimestampSchema,
+  probability: z.number().min(0).max(1),
+  reasons: z.array(z.string()),
+});
+export type FraudSignal = z.infer<typeof FraudSignalSchema>;
+
+// Traffic Quality Updated
+export const TrafficQualityUpdatedSchema = z.object({
+  publisherId: IdSchema,
+  score: z.number().min(0).max(100),
+  timestamp: TimestampSchema,
+});
+export type TrafficQualityUpdated = z.infer<typeof TrafficQualityUpdatedSchema>;
 
 // Traffic Attestation
 export const TrafficAttestationSchema = z.object({
@@ -127,9 +167,6 @@ export const AuditLogEntrySchema = z.object({
   hash: z.string(),
 });
 export type AuditLogEntry = z.infer<typeof AuditLogEntrySchema>;
-
-// Consent Record
-export const ConsentStatusSchema = z.enum(['active', 'expired', 'revoked']);
 
 export const ConsentRecordSchema = z.object({
   id: IdSchema,
