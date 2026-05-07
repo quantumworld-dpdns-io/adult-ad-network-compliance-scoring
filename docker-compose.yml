@@ -6,6 +6,7 @@ services:
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
       POSTGRES_DB: ${POSTGRES_DB:-compliance_scoring}
+      POSTGRES_MULTIPLE_DATABASES: audit_log,identity,campaign_manager,consent_manager,settlement
     ports:
       - "5432:5432"
     healthcheck:
@@ -15,6 +16,7 @@ services:
       retries: 5
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./scripts/init-db.sh:/docker-entrypoint-initdb.d/init-db.sh
 
   redis:
     image: redis:7-alpine
