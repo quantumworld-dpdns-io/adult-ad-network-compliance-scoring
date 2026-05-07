@@ -3,13 +3,7 @@ import { type NodePgDatabase } from 'drizzle-orm/node-pg';
 import { campaigns, advertisers, type Campaign, type NewCampaign } from './schema.js';
 import { publishers } from '../../identity/src/schema.js';
 import { type AuditLogService } from '../../audit-log/src/service.js';
-
-export interface TargetingRules {
-  min_compliance_score: number;
-  require_age_gate: boolean;
-  min_consent_record_status: number;
-  blocked_categories: string[];
-}
+import { type TargetingRules } from '@adult-ad-net/shared';
 
 export class CampaignManagerService {
   constructor(
@@ -88,25 +82,43 @@ export class CampaignManagerService {
   async validateTargeting(publisher: any, rules: TargetingRules): Promise<boolean> {
     const { complianceScore, ageGateDetails, categories } = publisher;
     
-    // 1. min_compliance_score
-    if (complianceScore.overall < rules.min_compliance_score) {
+    // 1. minComplianceScore
+    if (complianceScore.overall < (rules.minComplianceScore ?? 0)) {
       return false;
     }
 
-    // 2. require_age_gate
-    if (rules.require_age_gate && ageGateDetails.status !== 'verified') {
-      return false;
+    // 2. requiredAgeGateMethods
+    if (rules.requiredAgeGateMethods && rules.requiredAgeGateMethods.length > 0) {
+      if (!rules.requiredAgeGateMethods.includes(ageGateDetails.method) || ageGateDetails.status !== 'verified') {
+        return false;
+      }
     }
 
-    // 3. min_consent_record_status (mapping to complianceScore.consent as inferred)
-    if (complianceScore.consent < rules.min_consent_record_status) {
-      return false;
+    // 3. minConsentRecordStatus
+    if (rules.minConsentRecordStatus) {
+      // In this context, we might not have the full consent record status string
+      // but we can use complianceScore.consent as a proxy or assume it's passed in.
+      // For now, let's assume publisher might have consentStatus if provided.
+      const consentStatus = publisher.consentStatus || (complianceScore.consent >= 100 ? 'active' : 'expired');
+      
+      const statusPriority: Record<string, number> = {
+        'active': 3,
+        'disputed': 2,
+        'revoked': 1,
+        'expired': 0
+      };
+
+      const publisherPriority = statusPriority[consentStatus] ?? -1;
+      const requiredPriority = statusPriority[rules.minConsentRecordStatus] ?? 999;
+
+      if (publisherPriority < requiredPriority) return false;
     }
 
-    // 4. blocked_categories
-    if (rules.blocked_categories && rules.blocked_categories.length > 0) {
-      const hasBlockedCategory = categories.some((cat: string) => rules.blocked_categories.includes(cat));
-      if (hasBlockedCategory) {
+    // 4. categories (previously blocked_categories, now it's usually allowed categories in shared)
+    // Shared TargetingRules has 'categories' which usually means 'allowed'
+    if (rules.categories && rules.categories.length > 0) {
+      const hasAllowedCategory = categories.some((cat: string) => rules.categories?.includes(cat));
+      if (!hasAllowedCategory) {
         return false;
       }
     }
@@ -120,25 +132,10 @@ export class CampaignManagerService {
 
     const rules = campaign.targetingRules as unknown as TargetingRules;
     
-    // We can do some filtering at the DB level and some in JS
-    // For blocked_categories, we use ne or not overlaps if possible
-    
     const allPublishers = await this.db.select().from(publishers);
     
     return allPublishers.filter(pub => {
-        // We need to match the logic in validateTargeting
-        const { complianceScore, ageGateDetails, categories } = pub as any;
-        
-        if (complianceScore.overall < (rules.min_compliance_score || 0)) return false;
-        if (rules.require_age_gate && ageGateDetails.status !== 'verified') return false;
-        if (complianceScore.consent < (rules.min_consent_record_status || 0)) return false;
-        
-        if (rules.blocked_categories && rules.blocked_categories.length > 0) {
-            const hasBlockedCategory = (categories as string[]).some(cat => rules.blocked_categories.includes(cat));
-            if (hasBlockedCategory) return false;
-        }
-        
-        return true;
+        return this.validateTargeting(pub, rules);
     });
   }
 }

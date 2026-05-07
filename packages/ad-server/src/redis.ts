@@ -19,6 +19,10 @@ export class ScoreStore {
     return `publisher:score:${publisherId}`;
   }
 
+  private getConsentKey(publisherId: string): string {
+    return `publisher:consent:${publisherId}`;
+  }
+
   async getScore(publisherId: string): Promise<ComplianceScore | null> {
     try {
       const encoded = await this.redis.get(this.getScoreKey(publisherId));
@@ -26,6 +30,15 @@ export class ScoreStore {
       return decodeComplianceScore(encoded);
     } catch (error) {
       console.error(`Failed to get/decode score for publisher ${publisherId}:`, error);
+      return null;
+    }
+  }
+
+  async getConsentStatus(publisherId: string): Promise<string | null> {
+    try {
+      return await this.redis.get(this.getConsentKey(publisherId));
+    } catch (error) {
+      console.error(`Failed to get consent status for publisher ${publisherId}:`, error);
       return null;
     }
   }

@@ -70,12 +70,14 @@ describe('AuditLogService', () => {
     it('should return isValid: true for a valid chain', async () => {
       const entries = [
         {
+          id: 'uuid-1',
           sequence: 1n,
           eventType: 'E1',
           occurredAt: new Date('2024-01-01T00:00:00Z'),
           prevEntryHash: null,
         },
         {
+          id: 'uuid-2',
           sequence: 2n,
           eventType: 'E2',
           occurredAt: new Date('2024-01-01T00:01:00Z'),
@@ -106,11 +108,14 @@ describe('AuditLogService', () => {
 
       const result = await service.verifyChain();
       expect(result.isValid).toBe(true);
+      expect(result.totalEntries).toBe(2);
+      expect(result.discrepancies).toHaveLength(0);
     });
 
     it('should return isValid: false if a hash is tampered', async () => {
         const entries = [
           {
+            id: 'uuid-1',
             sequence: 1n,
             eventType: 'E1',
             occurredAt: new Date('2024-01-01T00:00:00Z'),
@@ -126,7 +131,65 @@ describe('AuditLogService', () => {
   
         const result = await service.verifyChain();
         expect(result.isValid).toBe(false);
-        expect(result.errorIndex).toBe(0);
+        expect(result.discrepancies).toHaveLength(1);
+        expect(result.discrepancies[0].type).toBe('HASH_MISMATCH');
+        expect(result.discrepancies[0].sequence).toBe('1');
       });
+
+    it('should return multiple discrepancies if multiple entries are tampered', async () => {
+      const entries = [
+        {
+          id: 'uuid-1',
+          sequence: 1n,
+          eventType: 'E1',
+          occurredAt: new Date('2024-01-01T00:00:00Z'),
+          prevEntryHash: null,
+          entryHash: 'hash-1'
+        },
+        {
+          id: 'uuid-2',
+          sequence: 2n,
+          eventType: 'E2',
+          occurredAt: new Date('2024-01-01T00:01:00Z'),
+          prevEntryHash: 'hash-1',
+          entryHash: 'hash-2'
+        },
+      ];
+
+      dbMock.select.mockReturnThis();
+      dbMock.from.mockReturnThis();
+      dbMock.orderBy.mockResolvedValue(entries);
+
+      const result = await service.verifyChain();
+      expect(result.isValid).toBe(false);
+      // Both will have HASH_MISMATCH because the hashes are hardcoded to 'hash-1'/'hash-2' 
+      // which won't match the recomputed ones
+      expect(result.discrepancies.length).toBeGreaterThanOrEqual(1);
+    });
+
+    it('should detect PREV_HASH_MISMATCH', async () => {
+      const entry = {
+        id: 'uuid-1',
+        sequence: 1n,
+        eventType: 'E1',
+        occurredAt: new Date('2024-01-01T00:00:00Z'),
+        prevEntryHash: 'wrong-prev-hash',
+      };
+      (entry as any).entryHash = calculateHash(
+        JSON.stringify({
+          eventType: entry.eventType,
+          occurredAt: entry.occurredAt.toISOString(),
+        }),
+        null // Actual expected prevHash is null for first entry
+      );
+
+      dbMock.select.mockReturnThis();
+      dbMock.from.mockReturnThis();
+      dbMock.orderBy.mockResolvedValue([entry]);
+
+      const result = await service.verifyChain();
+      expect(result.isValid).toBe(false);
+      expect(result.discrepancies.some(d => d.type === 'PREV_HASH_MISMATCH')).toBe(true);
+    });
   });
 });

@@ -5,6 +5,7 @@ const KAFKA_BROKERS = (process.env.KAFKA_BROKERS || 'localhost:9092').split(',')
 export const TOPICS = {
   IMPRESSION: 'IMPRESSION',
   SCORE_CHANGED: 'SCORE_CHANGED',
+  ATTESTATION: 'ATTESTATION',
 };
 
 export class KafkaManager {
@@ -33,6 +34,18 @@ export class KafkaManager {
         {
           key: impression.publisherId,
           value: JSON.stringify(impression),
+        },
+      ],
+    });
+  }
+
+  async publishAttestation(attestation: any): Promise<void> {
+    await this.producer.send({
+      topic: TOPICS.ATTESTATION,
+      messages: [
+        {
+          key: attestation.id,
+          value: JSON.stringify(attestation),
         },
       ],
     });

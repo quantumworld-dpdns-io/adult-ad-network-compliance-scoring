@@ -6,7 +6,11 @@
     "packages/*"
   ],
   "scripts": {
+    "build": "npm run build --workspaces --if-present",
+    "migrate": "npm run push --workspaces --if-present",
     "test": "vitest",
+    "test:performance": "k6 run tests/performance/load-test.js",
+    "test:smoke": "vitest run tests/smoke/smoke-test.ts",
     "lint": "eslint .",
     "format": "prettier --write ."
   },

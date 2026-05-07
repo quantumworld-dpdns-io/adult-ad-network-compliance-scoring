@@ -42,6 +42,7 @@ export class AdService {
 
     // 2. Retrieve publisher's compliance score from Redis (< 30ms target)
     const score = await this.scoreStore.getScore(publisherId);
+    const consentStatus = await this.scoreStore.getConsentStatus(publisherId);
 
     // 3. Fail-closed: If score is unavailable, do not serve.
     if (!score) {
@@ -49,7 +50,7 @@ export class AdService {
     }
 
     // 4. Select the most eligible campaign based on targeting rules and bid/priority.
-    const eligibleCampaign = this.selectCampaign(score, categories, country);
+    const eligibleCampaign = this.selectCampaign(score, consentStatus, categories, country);
     
     if (!eligibleCampaign) {
       return null;
@@ -77,7 +78,10 @@ export class AdService {
     // 7. Generate TrafficAttestation (signed with Ed25519)
     const attestation = this.generateAttestation(impressionId, publisherId, eligibleCampaign.id, score.overall, timestamp);
 
-    // 8. Publish IMPRESSION event to Kafka for fraud-detector
+    // 8. Publish ATTESTATION to Kafka for web3-anchor
+    await this.kafkaManager.publishAttestation(attestation).catch(err => console.error('Failed to publish attestation to Kafka:', err));
+
+    // 9. Publish IMPRESSION event to Kafka for fraud-detector
     const impressionEvent: Impression = {
       id: impressionId,
       campaignId: eligibleCampaign.id,
@@ -89,7 +93,7 @@ export class AdService {
       complianceScoreAtServe: score.overall,
     };
     
-    await this.kafkaManager.publishImpression(impressionEvent).catch(err => console.error('Failed to publish to Kafka:', err));
+    await this.kafkaManager.publishImpression(impressionEvent).catch(err => console.error('Failed to publish impression to Kafka:', err));
 
     return {
       adId: uuidv4(),
@@ -99,7 +103,7 @@ export class AdService {
     };
   }
 
-  private selectCampaign(score: ComplianceScore, categories?: string[], country?: string): Campaign | null {
+  private selectCampaign(score: ComplianceScore, consentStatus: string | null, categories?: string[], country?: string): Campaign | null {
     // Filter active campaigns by targeting rules
     const eligible = activeCampaigns.filter(c => {
       if (c.status !== 'active') return false;
@@ -108,6 +112,23 @@ export class AdService {
       
       // Compliance Score check (Fail-closed)
       if (score.overall < rules.minComplianceScore) return false;
+
+      // Consent Status check
+      if (rules.minConsentRecordStatus) {
+        if (!consentStatus) return false;
+        
+        const statusPriority: Record<string, number> = {
+          'active': 3,
+          'disputed': 2,
+          'revoked': 1,
+          'expired': 0
+        };
+
+        const publisherPriority = statusPriority[consentStatus] ?? -1;
+        const requiredPriority = statusPriority[rules.minConsentRecordStatus] ?? 999;
+
+        if (publisherPriority < requiredPriority) return false;
+      }
       
       // Category check
       if (rules.categories && categories) {

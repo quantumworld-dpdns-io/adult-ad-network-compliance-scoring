@@ -9,15 +9,15 @@ This checklist tracks the implementation phases for the Adult Ad Network with Co
 - [x] Define shared domain types and Zod schemas
 - [x] Implement `AuditLog` service (append-only, hash-chain, PostgreSQL-backed)
 - [x] Implement `ComplianceScore` parser/serializer with round-trip property tests
-- [ ] Database migrations (Flyway or Drizzle ORM)
-- [ ] CI pipeline: lint → type-check → unit tests → integration tests
+- [x] Database migrations (Drizzle ORM)
+- [x] CI pipeline: lint → type-check → unit tests → integration tests
 
 ## Phase 1 — Publisher Onboarding and Scoring Engine (Weeks 3–5)
 - [x] Publisher registration API (POST `/v1/publishers`)
 - [x] Scoring Engine service implementation (Weighted aggregate formula)
 - [x] Score API (GET `/v1/publishers/:id/score`)
 - [x] Auto-suspension when score drops below 40
-- [ ] Publisher credential issuance on approval
+- [x] Publisher credential issuance on approval
 
 ## Phase 2 — Age-Gate Verification (Weeks 6–7)
 - [x] Crawler-based verifier implementation
@@ -31,7 +31,7 @@ This checklist tracks the implementation phases for the Adult Ad Network with Co
 - [x] Expiry notification scheduler
 - [x] Expiry enforcement mechanisms
 - [x] Dispute workflow
-- [ ] Advertiser targeting condition: minimum Consent_Record_Status
+- [x] Advertiser targeting condition: minimum Consent_Record_Status
 
 ## Phase 4 — Traffic Quality Scoring and Fraud Detection (Weeks 10–12)
 - [x] Impression evaluation pipeline (Kafka consumer, IP lookup, CTR anomalies)
@@ -39,7 +39,7 @@ This checklist tracks the implementation phases for the Adult Ad Network with Co
 - [x] Rolling 30-day Traffic_Quality_Score computation in Redis/ClickHouse
 - [x] Publisher suspension for low traffic quality (via aggregate score)
 - [x] Traffic Attestation generation
-- [ ] Attestation retrieval API
+- [x] Attestation retrieval API
 
 ## Phase 5 — Campaign Management and Ad Serving (Weeks 13–16)
 - [x] Campaign CRUD API with targeting rule validation
@@ -66,8 +66,8 @@ This checklist tracks the implementation phases for the Adult Ad Network with Co
 - [x] Notification system (email + in-platform alerts)
 
 ## Phase 9 — Hardening, Performance, and Launch Readiness (Weeks 25–26)
-- [ ] Load testing and chaos testing
-- [ ] AuditLog hash-chain integrity verification endpoint
-- [ ] Security audit and data retention policies
-- [ ] Runbook documentation
-- [ ] Staging environment smoke tests
+- [x] Load testing and chaos testing
+- [x] AuditLog hash-chain integrity verification endpoint
+- [x] Security audit and data retention policies
+- [x] Runbook documentation
+- [x] Staging environment smoke tests

@@ -55,12 +55,45 @@ export class AuditLogService {
     });
   }
 
-  async verifyChain(): Promise<{ isValid: boolean; errorIndex?: number }> {
+  async listEntries(limit = 50, offset = 0): Promise<AuditLogEntry[]> {
+    return await this.db
+      .select()
+      .from(auditLogs)
+      .orderBy(desc(auditLogs.sequence))
+      .limit(limit)
+      .offset(offset);
+  }
+
+  async getLatestHash(): Promise<string | null> {
+    const lastEntry = await this.db
+      .select({ entryHash: auditLogs.entryHash })
+      .from(auditLogs)
+      .orderBy(desc(auditLogs.sequence))
+      .limit(1)
+      .then((rows) => rows[0]);
+
+    return lastEntry?.entryHash ?? null;
+  }
+
+  async verifyChain(): Promise<{
+    isValid: boolean;
+    totalEntries: number;
+    discrepancies: Array<{
+      sequence: string;
+      id: string;
+      type: 'HASH_MISMATCH' | 'PREV_HASH_MISMATCH';
+      expectedHash?: string;
+      actualHash?: string;
+      expectedPrevHash?: string;
+      actualPrevHash?: string;
+    }>;
+  }> {
     const allEntries = await this.db
       .select()
       .from(auditLogs)
       .orderBy(auditLogs.sequence);
 
+    const discrepancies: any[] = [];
     let prevHash: string | null = null;
 
     for (let i = 0; i < allEntries.length; i++) {
@@ -68,7 +101,13 @@ export class AuditLogService {
 
       // Check prevEntryHash matches
       if (entry.prevEntryHash !== prevHash) {
-        return { isValid: false, errorIndex: i };
+        discrepancies.push({
+          sequence: entry.sequence.toString(),
+          id: entry.id,
+          type: 'PREV_HASH_MISMATCH',
+          expectedPrevHash: prevHash,
+          actualPrevHash: entry.prevEntryHash,
+        });
       }
 
       // Recompute hash
@@ -76,12 +115,22 @@ export class AuditLogService {
       const expectedHash = calculateHash(content, prevHash);
 
       if (entry.entryHash !== expectedHash) {
-        return { isValid: false, errorIndex: i };
+        discrepancies.push({
+          sequence: entry.sequence.toString(),
+          id: entry.id,
+          type: 'HASH_MISMATCH',
+          expectedHash,
+          actualHash: entry.entryHash,
+        });
       }
 
       prevHash = entry.entryHash;
     }
 
-    return { isValid: true };
+    return {
+      isValid: discrepancies.length === 0,
+      totalEntries: allEntries.length,
+      discrepancies,
+    };
   }
 }

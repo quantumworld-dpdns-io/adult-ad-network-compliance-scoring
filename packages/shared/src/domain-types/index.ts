@@ -69,6 +69,7 @@ export type Publisher = z.infer<typeof PublisherSchema>;
 export const TargetingRulesSchema = z.object({
   minComplianceScore: z.number().min(0).max(100).default(0),
   requiredAgeGateMethods: z.array(AgeGateVerificationMethodSchema).optional(),
+  minConsentRecordStatus: ConsentStatusSchema.optional(),
   allowedCountries: z.array(z.string().length(2)).optional(), // ISO 3166-1 alpha-2
   categories: z.array(z.string()).optional(),
 });

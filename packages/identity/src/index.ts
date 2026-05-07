@@ -12,8 +12,12 @@ import {
 import { createClient } from 'redis';
 import { Kafka, Consumer } from 'kafkajs';
 import { eq } from 'drizzle-orm';
+import { signMessage, generateEd25519KeyPair } from '@adult-ad-net/shared';
 
 dotenv.config();
+
+const ISSUER_PRIVATE_KEY = process.env.ISSUER_PRIVATE_KEY || generateEd25519KeyPair().privateKey;
+const ADMIN_KEY = process.env.ADMIN_KEY || 'admin-secret-key';
 
 export const RegisterPublisherRequestSchema = z.object({
   domain: z.string().url(),
@@ -72,6 +76,63 @@ export function buildApp(
       });
 
       return reply.status(201).send(newPublisher);
+    } catch (error) {
+      fastify.log.error(error);
+      return reply.status(500).send({ error: 'Internal Server Error' });
+    }
+  });
+
+  fastify.patch('/v1/publishers/:id/approve', async (request, reply) => {
+    const { id } = request.params as { id: string };
+    const adminKey = request.headers['x-admin-key'];
+
+    if (adminKey !== ADMIN_KEY) {
+      return reply.status(403).send({ error: 'Unauthorized: Admin only' });
+    }
+
+    try {
+      const [publisher] = await db.select().from(publishers).where(eq(publishers.id, id)).limit(1);
+      if (!publisher) {
+        return reply.status(404).send({ error: 'Publisher not found' });
+      }
+
+      if (publisher.status !== 'pending_review') {
+        return reply.status(400).send({ error: `Cannot approve publisher in status: ${publisher.status}` });
+      }
+
+      // Update status to active
+      const [updatedPublisher] = await db.update(publishers)
+        .set({ status: 'active' })
+        .where(eq(publishers.id, id))
+        .returning();
+
+      // Issue VC
+      const vcPayload = {
+        sub: publisher.id,
+        domain: publisher.domain,
+        status: 'active',
+        iat: Math.floor(Date.now() / 1000),
+      };
+      const signature = signMessage(JSON.stringify(vcPayload), ISSUER_PRIVATE_KEY);
+      
+      const vc = {
+        ...vcPayload,
+        proof: {
+          type: 'Ed25519Signature2018',
+          signature,
+        }
+      };
+
+      await auditLogService.appendEntry({
+        eventType: 'PUBLISHER_APPROVED',
+        affectedEntityId: id,
+        beforeState: publisher,
+        afterState: updatedPublisher,
+        occurredAt: new Date(),
+        metadata: { vc }
+      });
+
+      return reply.send({ publisher: updatedPublisher, vc });
     } catch (error) {
       fastify.log.error(error);
       return reply.status(500).send({ error: 'Internal Server Error' });
