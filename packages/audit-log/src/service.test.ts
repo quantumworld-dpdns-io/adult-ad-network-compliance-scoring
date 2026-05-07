@@ -36,7 +36,7 @@ describe('AuditLogService', () => {
         from: vi.fn().mockReturnThis(),
         orderBy: vi.fn().mockReturnThis(),
         limit: vi.fn().mockImplementation(() => ({
-          then: vi.fn().mockResolvedValue([lastEntry]),
+          then: (cb: any) => Promise.resolve(cb([lastEntry])),
         })),
         insert: vi.fn().mockReturnThis(),
         values: vi.fn().mockReturnThis(),

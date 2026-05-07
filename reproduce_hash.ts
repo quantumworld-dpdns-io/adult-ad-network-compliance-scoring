@@ -14,38 +14,46 @@ const newEntry = {
   occurredAt: new Date('2024-01-01T00:00:00Z'),
 };
 
-const expectedContent = JSON.stringify({
-  eventType: newEntry.eventType,
-  actorId: newEntry.actorId,
-  affectedEntityId: newEntry.affectedEntityId,
-  beforeState: newEntry.beforeState,
-  afterState: newEntry.afterState,
-  occurredAt: newEntry.occurredAt.toISOString(),
+const contents = [
+    // 1. Original
+    JSON.stringify({
+        eventType: newEntry.eventType,
+        actorId: newEntry.actorId,
+        affectedEntityId: newEntry.affectedEntityId,
+        beforeState: newEntry.beforeState,
+        afterState: newEntry.afterState,
+        occurredAt: newEntry.occurredAt.toISOString(),
+    }),
+    // 2. Without .toISOString() (JSON.stringify does it anyway)
+    JSON.stringify({
+        eventType: newEntry.eventType,
+        actorId: newEntry.actorId,
+        affectedEntityId: newEntry.affectedEntityId,
+        beforeState: newEntry.beforeState,
+        afterState: newEntry.afterState,
+        occurredAt: newEntry.occurredAt,
+    }),
+    // 3. Different order?
+    JSON.stringify({
+        actorId: newEntry.actorId,
+        affectedEntityId: newEntry.affectedEntityId,
+        afterState: newEntry.afterState,
+        beforeState: newEntry.beforeState,
+        eventType: newEntry.eventType,
+        occurredAt: newEntry.occurredAt.toISOString(),
+    }),
+    // 4. Maybe actorId/affectedEntityId are missing?
+    JSON.stringify({
+        eventType: newEntry.eventType,
+        beforeState: newEntry.beforeState,
+        afterState: newEntry.afterState,
+        occurredAt: newEntry.occurredAt.toISOString(),
+    }),
+];
+
+contents.forEach((content, i) => {
+    console.log(`Hash ${i+1}:`, calculateHash(content, 'previous-hash'));
 });
 
-console.log('Expected Hash (all fields):', calculateHash(expectedContent, 'previous-hash'));
-
-const contentNoIds = JSON.stringify({
-  eventType: newEntry.eventType,
-  beforeState: newEntry.beforeState,
-  afterState: newEntry.afterState,
-  occurredAt: newEntry.occurredAt.toISOString(),
-});
-console.log('Hash (no actorId/affectedEntityId):', calculateHash(contentNoIds, 'previous-hash'));
-
-const contentOnlyEventAndDate = JSON.stringify({
-  eventType: newEntry.eventType,
-  occurredAt: newEntry.occurredAt.toISOString(),
-});
-console.log('Hash (only eventType and occurredAt):', calculateHash(contentOnlyEventAndDate, 'previous-hash'));
-
-const contentWithNulls = JSON.stringify({
-  eventType: newEntry.eventType,
-  actorId: newEntry.actorId,
-  affectedEntityId: newEntry.affectedEntityId,
-  beforeState: newEntry.beforeState,
-  afterState: newEntry.afterState,
-  occurredAt: newEntry.occurredAt.toISOString(),
-});
-// wait, that's the same as the first one.
-
+// Try with null prevHash
+console.log(`Hash (prevHash=null):`, calculateHash(contents[0], null));
