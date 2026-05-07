@@ -1,7 +1,7 @@
 import Fastify, { FastifyInstance } from 'fastify';
 import { z } from 'zod';
 import { Pool } from 'pg';
-import { drizzle, NodePgDatabase } from 'drizzle-orm/node-pg';
+import { drizzle, NodePgDatabase } from 'drizzle-orm/node-postgres';
 import * as dotenv from 'dotenv';
 import { publishers } from './schema';
 import { AuditLogService } from '@adult-ad-net/audit-log';

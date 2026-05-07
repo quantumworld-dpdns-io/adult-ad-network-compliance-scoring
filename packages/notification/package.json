@@ -10,7 +10,7 @@
     "start": "node dist/index.js"
   },
   "dependencies": {
-    "@adult-ad-net/shared": "workspace:*",
+    "@adult-ad-net/shared": "*",
     "dotenv": "^16.4.5",
     "ioredis": "^5.4.1",
     "kafkajs": "^2.2.4"

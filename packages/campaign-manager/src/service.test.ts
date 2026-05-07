@@ -27,59 +27,59 @@ describe('CampaignManagerService', () => {
 
   describe('validateTargeting', () => {
     const rules: TargetingRules = {
-      min_compliance_score: 70,
-      require_age_gate: true,
-      min_consent_record_status: 60,
-      blocked_categories: ['gambling'],
+      minComplianceScore: 70,
+      requiredAgeGateMethods: ['crawler', 'screenshot', 'VC'],
+      minConsentRecordStatus: 'active',
+      categories: ['news', 'entertainment'],
     };
 
     it('should return true for an eligible publisher', async () => {
       const publisher = {
-        complianceScore: { overall: 80, consent: 70 },
-        ageGateDetails: { status: 'verified' },
+        complianceScore: { overall: 80, consent: 100 },
+        ageGateDetails: { status: 'verified', method: 'crawler' },
         categories: ['news', 'entertainment'],
       };
-      const result = await service.validateTargeting(publisher, rules);
+      const result = service.validateTargeting(publisher, rules);
       expect(result).toBe(true);
     });
 
     it('should return false if compliance score is too low', async () => {
       const publisher = {
-        complianceScore: { overall: 60, consent: 70 },
-        ageGateDetails: { status: 'verified' },
+        complianceScore: { overall: 60, consent: 100 },
+        ageGateDetails: { status: 'verified', method: 'crawler' },
         categories: ['news'],
       };
-      const result = await service.validateTargeting(publisher, rules);
+      const result = service.validateTargeting(publisher, rules);
       expect(result).toBe(false);
     });
 
     it('should return false if age gate is required but not verified', async () => {
       const publisher = {
-        complianceScore: { overall: 80, consent: 70 },
-        ageGateDetails: { status: 'pending' },
+        complianceScore: { overall: 80, consent: 100 },
+        ageGateDetails: { status: 'pending', method: 'crawler' },
         categories: ['news'],
       };
-      const result = await service.validateTargeting(publisher, rules);
+      const result = service.validateTargeting(publisher, rules);
       expect(result).toBe(false);
     });
 
     it('should return false if consent score is too low', async () => {
       const publisher = {
         complianceScore: { overall: 80, consent: 50 },
-        ageGateDetails: { status: 'verified' },
+        ageGateDetails: { status: 'verified', method: 'crawler' },
         categories: ['news'],
       };
-      const result = await service.validateTargeting(publisher, rules);
+      const result = service.validateTargeting(publisher, rules);
       expect(result).toBe(false);
     });
 
-    it('should return false if publisher has blocked category', async () => {
+    it('should return false if publisher has no allowed category', async () => {
       const publisher = {
-        complianceScore: { overall: 80, consent: 70 },
-        ageGateDetails: { status: 'verified' },
-        categories: ['news', 'gambling'],
+        complianceScore: { overall: 80, consent: 100 },
+        ageGateDetails: { status: 'verified', method: 'crawler' },
+        categories: ['gambling'],
       };
-      const result = await service.validateTargeting(publisher, rules);
+      const result = service.validateTargeting(publisher, rules);
       expect(result).toBe(false);
     });
   });
@@ -91,10 +91,10 @@ describe('CampaignManagerService', () => {
         name: 'Test Campaign',
         budget: 1000,
         targetingRules: {
-          min_compliance_score: 50,
-          require_age_gate: false,
-          min_consent_record_status: 0,
-          blocked_categories: [],
+          minComplianceScore: 50,
+          requiredAgeGateMethods: [],
+          minConsentRecordStatus: 'active',
+          categories: [],
         },
       };
 
@@ -117,30 +117,30 @@ describe('CampaignManagerService', () => {
       const campaign = {
         id: 'camp-123',
         targetingRules: {
-          min_compliance_score: 70,
-          require_age_gate: true,
-          min_consent_record_status: 60,
-          blocked_categories: ['gambling'],
+          minComplianceScore: 70,
+          requiredAgeGateMethods: ['crawler'],
+          minConsentRecordStatus: 'active',
+          categories: ['news'],
         },
       };
 
       const publishers = [
         {
           id: 'pub-1', // Eligible
-          complianceScore: { overall: 80, consent: 70 },
-          ageGateDetails: { status: 'verified' },
+          complianceScore: { overall: 80, consent: 100 },
+          ageGateDetails: { status: 'verified', method: 'crawler' },
           categories: ['news'],
         },
         {
           id: 'pub-2', // Ineligible: low score
-          complianceScore: { overall: 60, consent: 70 },
-          ageGateDetails: { status: 'verified' },
+          complianceScore: { overall: 60, consent: 100 },
+          ageGateDetails: { status: 'verified', method: 'crawler' },
           categories: ['news'],
         },
         {
-          id: 'pub-3', // Ineligible: blocked category
-          complianceScore: { overall: 80, consent: 70 },
-          ageGateDetails: { status: 'verified' },
+          id: 'pub-3', // Ineligible: no allowed category
+          complianceScore: { overall: 80, consent: 100 },
+          ageGateDetails: { status: 'verified', method: 'crawler' },
           categories: ['gambling'],
         },
       ];

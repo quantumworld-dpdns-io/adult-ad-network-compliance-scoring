@@ -39,7 +39,7 @@ describe('FraudDetector', () => {
   it('should detect CTR anomalies', () => {
     const evaluation = detector.evaluateImpression(baseImpression, 0.15); // 15% CTR
     expect(evaluation.probability).toBeGreaterThan(0);
-    expect(evaluation.reasons).some(r => r.includes('High CTR anomaly'));
+    expect(evaluation.reasons.some(r => r.includes('High CTR anomaly'))).toBe(true);
   });
 
   it('should combine multiple fraud signals', () => {

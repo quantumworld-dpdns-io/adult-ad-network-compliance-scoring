@@ -1,5 +1,5 @@
 import { eq, and, gte, lte, sql } from 'drizzle-orm';
-import { type NodePgDatabase } from 'drizzle-orm/node-pg';
+import { type NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { impressions, conversions, settlementReports, type SettlementReport } from './schema.js';
 import { createHash } from 'crypto';
 import cron from 'node-cron';

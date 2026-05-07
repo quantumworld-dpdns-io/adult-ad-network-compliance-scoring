@@ -1,5 +1,5 @@
 import { Pool } from 'pg';
-import { drizzle } from 'drizzle-orm/node-pg';
+import { drizzle } from 'drizzle-orm/node-postgres';
 import * as dotenv from 'dotenv';
 import { AuditLogService } from './service.js';
 import { buildApp } from './app.js';

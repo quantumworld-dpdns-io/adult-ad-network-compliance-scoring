@@ -164,12 +164,17 @@ export const AuditLogEntrySchema = z.object({
 });
 export type AuditLogEntry = z.infer<typeof AuditLogEntrySchema>;
 
-// Consent Record
-export const ConsentStatusSchema = z.enum(['active', 'disputed', 'revoked', 'expired']);
-
 export const ConsentRecordSchema = z.object({
   id: IdSchema,
   publisherId: IdSchema,
+  documentHash: z.string(), // Hash of the consent document
+  status: ConsentStatusSchema,
+  validFrom: TimestampSchema,
+  validUntil: TimestampSchema.optional(),
+  metadata: z.record(z.any()).optional(),
+});
+export type ConsentRecord = z.infer<typeof ConsentRecordSchema>;
+chema,
   documentHash: z.string(), // Hash of the consent document
   status: ConsentStatusSchema,
   validFrom: TimestampSchema,

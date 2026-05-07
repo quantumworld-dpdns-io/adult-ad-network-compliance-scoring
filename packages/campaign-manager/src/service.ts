@@ -1,5 +1,5 @@
 import { eq, and, sql, notInArray, arrayOverlaps, ne } from 'drizzle-orm';
-import { type NodePgDatabase } from 'drizzle-orm/node-pg';
+import { type NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { campaigns, advertisers, type Campaign, type NewCampaign } from './schema.js';
 import { publishers } from '../../identity/src/schema.js';
 import { type AuditLogService } from '../../audit-log/src/service.js';
@@ -79,7 +79,7 @@ export class CampaignManagerService {
     return true;
   }
 
-  async validateTargeting(publisher: any, rules: TargetingRules): Promise<boolean> {
+  validateTargeting(publisher: any, rules: TargetingRules): boolean {
     const { complianceScore, ageGateDetails, categories } = publisher;
     
     // 1. minComplianceScore

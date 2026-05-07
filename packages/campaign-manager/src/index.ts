@@ -2,7 +2,7 @@ import { Hono } from 'hono';
 import { z } from 'zod';
 import { zValidator } from '@hono/zod-validator';
 import { CampaignManagerService, type TargetingRules } from './service.js';
-import { type NodePgDatabase } from 'drizzle-orm/node-pg';
+import { type NodePgDatabase } from 'drizzle-orm/node-postgres';
 
 const TargetingRulesSchema = z.object({
   min_compliance_score: z.number().min(0).max(100).default(0),

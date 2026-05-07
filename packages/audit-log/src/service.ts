@@ -1,5 +1,5 @@
 import { desc, eq, sql } from 'drizzle-orm';
-import { type NodePgDatabase } from 'drizzle-orm/node-pg';
+import { type NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { auditLogs, type AuditLogEntry, type NewAuditLogEntry } from './schema.js';
 import { calculateHash } from './crypto.js';
 
