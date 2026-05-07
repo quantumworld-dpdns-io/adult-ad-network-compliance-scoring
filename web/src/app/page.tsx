@@ -84,11 +84,11 @@ export default function SimulationPage() {
                       <span className="font-medium">{pub.name}</span>
                       <span className={cn(
                         "text-xs font-bold px-2 py-0.5 rounded",
-                        pub.score >= 80 ? "bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400" :
-                        pub.score >= 60 ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-400" :
+                        pub.scores.overall >= 80 ? "bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400" :
+                        pub.scores.overall >= 60 ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-400" :
                         "bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400"
                       )}>
-                        {pub.score}
+                        {pub.scores.overall}
                       </span>
                     </div>
                     <div className="text-sm text-zinc-500 dark:text-zinc-400">
