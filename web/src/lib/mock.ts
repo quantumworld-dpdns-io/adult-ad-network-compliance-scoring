@@ -2,6 +2,7 @@ export interface Publisher {
   id: string;
   name: string;
   domain: string;
+  category: string;
   scores: {
     overall: number;
     ageGate: number;
@@ -16,6 +17,7 @@ export const publishers: Publisher[] = [
     id: "pub-1",
     name: "Premium Adult Portal",
     domain: "premium-portal.com",
+    category: "Entertainment",
     scores: {
       overall: 95,
       ageGate: 98,
@@ -28,6 +30,7 @@ export const publishers: Publisher[] = [
     id: "pub-2",
     name: "Independent Creator Hub",
     domain: "creators-hub.net",
+    category: "Social",
     scores: {
       overall: 72,
       ageGate: 85,
@@ -40,6 +43,7 @@ export const publishers: Publisher[] = [
     id: "pub-3",
     name: "Unverified Content Network",
     domain: "unverified-net.com",
+    category: "UGC",
     scores: {
       overall: 35,
       ageGate: 40,
