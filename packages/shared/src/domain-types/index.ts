@@ -53,6 +53,10 @@ export const AgeGateDetailsSchema = z.object({
 });
 export type AgeGateDetails = z.infer<typeof AgeGateDetailsSchema>;
 
+// Consent Status
+export const ConsentStatusSchema = z.enum(['active', 'expired', 'revoked', 'disputed']);
+export type ConsentStatus = z.infer<typeof ConsentStatusSchema>;
+
 // Publisher
 export const PublisherSchema = z.object({
   id: IdSchema,
@@ -167,14 +171,6 @@ export type AuditLogEntry = z.infer<typeof AuditLogEntrySchema>;
 export const ConsentRecordSchema = z.object({
   id: IdSchema,
   publisherId: IdSchema,
-  documentHash: z.string(), // Hash of the consent document
-  status: ConsentStatusSchema,
-  validFrom: TimestampSchema,
-  validUntil: TimestampSchema.optional(),
-  metadata: z.record(z.any()).optional(),
-});
-export type ConsentRecord = z.infer<typeof ConsentRecordSchema>;
-chema,
   documentHash: z.string(), // Hash of the consent document
   status: ConsentStatusSchema,
   validFrom: TimestampSchema,

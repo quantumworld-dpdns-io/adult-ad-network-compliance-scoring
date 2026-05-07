@@ -22,6 +22,11 @@ const { mockDb, mockSend } = vi.hoisted(() => {
   mDb.values.mockReturnValue(mDb);
   mDb.update.mockReturnValue(mDb);
   mDb.set.mockReturnValue(mDb);
+  mDb.returning.mockReturnValue(mDb);
+  
+  mDb.then = vi.fn().mockImplementation(function(this: any, onfulfilled: any) {
+    return Promise.resolve(this._results || []).then(onfulfilled);
+  });
 
   return {
     mockDb: mDb,
@@ -57,18 +62,19 @@ describe('Consent Manager Service', () => {
     mockDb.values.mockReturnValue(mockDb);
     mockDb.update.mockReturnValue(mockDb);
     mockDb.set.mockReturnValue(mockDb);
+    mockDb.returning.mockReturnValue(mockDb);
   });
 
   describe('calculateConsentScore', () => {
     it('should return 100 if there are active records', async () => {
-      mockDb.where.mockResolvedValue([{ id: '1', status: 'active' }]);
+      mockDb._results = [{ id: '1', status: 'active' }];
 
       const score = await calculateConsentScore('pub1');
       expect(score).toBe(100);
     });
 
     it('should return 0 if there are no active records', async () => {
-      mockDb.where.mockResolvedValue([]);
+      mockDb._results = [];
 
       const score = await calculateConsentScore('pub1');
       expect(score).toBe(0);
@@ -78,9 +84,7 @@ describe('Consent Manager Service', () => {
   describe('addConsentRecord', () => {
     it('should add a record and publish an update', async () => {
       const mockRecord = { id: '1', publisherId: 'pub1', status: 'active' };
-      mockDb.returning.mockResolvedValue([mockRecord]);
-      // For calculateConsentScore inside addConsentRecord
-      mockDb.where.mockResolvedValue([mockRecord]);
+      mockDb._results = [mockRecord];
 
       const record = await addConsentRecord('pub1', 'adult', 'a'.repeat(64));
       
@@ -101,9 +105,9 @@ describe('Consent Manager Service', () => {
   describe('updateConsentStatus', () => {
     it('should update status and publish update', async () => {
       const mockRecord = { id: '1', publisherId: 'pub1', status: 'disputed' };
-      mockDb.returning.mockResolvedValue([mockRecord]);
-      // For calculateConsentScore: assume no other active records
-      mockDb.where.mockResolvedValue([]);
+      // First call (update) should return mockRecord, second (calculateScore) should return []
+      mockDb.returning.mockResolvedValueOnce([mockRecord]);
+      mockDb._results = [];
 
       const record = await updateConsentStatus('1', 'disputed');
       
@@ -122,9 +126,8 @@ describe('Consent Manager Service', () => {
   describe('checkExpirations', () => {
     it('should expire old records and publish updates', async () => {
       const expiredRecord = { id: '1', publisherId: 'pub1', status: 'expired' };
-      mockDb.returning.mockResolvedValue([expiredRecord]);
-      // For calculateConsentScore
-      mockDb.where.mockResolvedValue([]);
+      mockDb.returning.mockResolvedValueOnce([expiredRecord]);
+      mockDb._results = [];
 
       const expired = await checkExpirations();
       

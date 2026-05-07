@@ -29,7 +29,7 @@ export const RegisterPublisherRequestSchema = z.object({
 export function buildApp(
   db: NodePgDatabase<any>, 
   auditLogService: AuditLogService,
-  redisClient: any
+  redisClient?: any
 ): FastifyInstance {
   const fastify = Fastify({ logger: { level: 'info' } });
 
@@ -143,10 +143,12 @@ export function buildApp(
     const { id } = request.params as { id: string };
     
     try {
-      // 1. Try Redis
-      const cachedScore = await redisClient.get(`publisher:score:${id}`);
-      if (cachedScore) {
-        return reply.send(JSON.parse(cachedScore));
+      // 1. Try Redis (if available)
+      if (redisClient) {
+        const cachedScore = await redisClient.get(`publisher:score:${id}`);
+        if (cachedScore) {
+          return reply.send(JSON.parse(cachedScore));
+        }
       }
 
       // 2. Fallback to DB

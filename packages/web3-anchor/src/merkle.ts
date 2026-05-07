@@ -29,11 +29,18 @@ export class MerkleTreeBuilder {
   }
 
   /**
+   * Hash function compatible with merkletreejs — receives a Buffer and returns a Buffer.
+   */
+  private static sha256(data: Buffer): Buffer {
+    return crypto.createHash('sha256').update(data).digest();
+  }
+
+  /**
    * Builds a Merkle tree from a batch of attestations.
    */
   static buildTree(attestations: TrafficAttestation[]): MerkleTree {
     const leaves = attestations.map((a) => this.hashAttestation(a));
-    return new MerkleTree(leaves, crypto.createHash('sha256'), { sortPairs: true });
+    return new MerkleTree(leaves, this.sha256, { sortPairs: true });
   }
 
   /**
@@ -41,7 +48,7 @@ export class MerkleTreeBuilder {
    */
   static getProof(attestations: TrafficAttestation[], targetId: string): MerkleProof | null {
     const leaves = attestations.map((a) => this.hashAttestation(a));
-    const tree = new MerkleTree(leaves, crypto.createHash('sha256'), { sortPairs: true });
+    const tree = new MerkleTree(leaves, this.sha256, { sortPairs: true });
     
     const targetIndex = attestations.findIndex((a) => a.id === targetId);
     if (targetIndex === -1) return null;

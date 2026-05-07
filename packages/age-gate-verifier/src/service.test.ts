@@ -1,4 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+
+vi.stubEnv('SIGNING_PRIVATE_KEY', 'mock-key');
+
 import { AgeGateService } from './service.js';
 
 // Mock kafkajs

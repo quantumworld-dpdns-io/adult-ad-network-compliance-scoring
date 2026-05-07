@@ -10,9 +10,9 @@ import { v4 as uuidv4 } from 'uuid';
 vi.mock('./kafka', () => {
   return {
     KafkaManager: vi.fn().mockImplementation(() => ({
-      connect: vi.fn().resolveValue(undefined),
+      connect: vi.fn().mockResolvedValue(undefined),
       subscribeToAttestations: vi.fn(),
-      disconnect: vi.fn().resolveValue(undefined),
+      disconnect: vi.fn().mockResolvedValue(undefined),
     })),
   };
 });
@@ -20,7 +20,7 @@ vi.mock('./kafka', () => {
 vi.mock('../../ad-server/src/kafka', () => {
   return {
     KafkaManager: vi.fn().mockImplementation(() => ({
-      connect: vi.fn().resolveValue(undefined),
+      connect: vi.fn().mockResolvedValue(undefined),
       publishAttestation: vi.fn(),
       publishImpression: vi.fn(),
     })),
@@ -30,7 +30,7 @@ vi.mock('../../ad-server/src/kafka', () => {
 vi.mock('../../ad-server/src/redis', () => {
   return {
     ScoreStore: vi.fn().mockImplementation(() => ({
-      getScore: vi.fn().resolveValue({ overall: 85 }),
+      getScore: vi.fn().mockResolvedValue({ overall: 85 }),
     })),
   };
 });
