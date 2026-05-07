@@ -1,33 +1,9 @@
-# OS
+node_modules
+dist
+.eslintcache
+*.log
 .DS_Store
-Thumbs.db
-
-# Editor
-.vscode/
-.idea/
-*.swp
-
-# Build artifacts
-dist/
-build/
-__pycache__/
-*.pyc
-*.class
-
-# Dependencies
-node_modules/
-vendor/
-
-# Environment
+coverage
 .env
 .env.*
 !.env.example
-/.kiro
-peopose.md
-
-
-# docs
-peopose.md
-.peopose.md
-./peopose.md
-/peopose.md

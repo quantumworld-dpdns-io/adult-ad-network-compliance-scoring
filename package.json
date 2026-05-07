@@ -1,0 +1,23 @@
+{
+  "name": "adult-ad-network-compliance-scoring",
+  "private": true,
+  "description": "Adult Ad Network with Compliance Scoring",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "test": "vitest",
+    "lint": "eslint .",
+    "format": "prettier --write ."
+  },
+  "devDependencies": {
+    "typescript": "^5.4.5",
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.5",
+    "vitest": "^1.6.0",
+    "@typescript-eslint/eslint-plugin": "^7.8.0",
+    "@typescript-eslint/parser": "^7.8.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-prettier": "^5.1.3"
+  }
+}
