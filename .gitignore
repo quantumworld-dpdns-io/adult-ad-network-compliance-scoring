@@ -22,3 +22,5 @@ vendor/
 .env
 .env.*
 !.env.example
+/.kiro
+peopose.md
