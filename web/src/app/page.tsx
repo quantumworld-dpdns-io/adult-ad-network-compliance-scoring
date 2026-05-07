@@ -106,9 +106,9 @@ export default function SimulationPage() {
               </h3>
               <div className="space-y-4">
                 {[
-                  { label: "Age Verification", value: selectedPublisher.details.ageVerification },
-                  { label: "Content Moderation", value: selectedPublisher.details.contentModeration },
-                  { label: "Traffic Quality", value: selectedPublisher.details.trafficQuality },
+                  { label: "Age Verification", value: selectedPublisher.scores.ageGate },
+                  { label: "Content Moderation", value: selectedPublisher.scores.safety },
+                  { label: "Traffic Quality", value: selectedPublisher.scores.traffic },
                 ].map((stat) => (
                   <div key={stat.label}>
                     <div className="flex justify-between text-sm mb-1.5">
@@ -156,8 +156,8 @@ export default function SimulationPage() {
           <div className="lg:col-span-7 h-full">
             <div className={cn(
               "h-full min-h-[500px] bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-200 dark:border-zinc-800 overflow-hidden flex flex-col",
-              result?.success === true && "border-green-200 dark:border-green-900/30",
-              result?.success === false && "border-red-200 dark:border-red-900/30"
+              result?.status === "success" && "border-green-200 dark:border-green-900/30",
+              result?.status === "blocked" && "border-red-200 dark:border-red-900/30"
             )}>
               <div className="p-6 border-b border-zinc-100 dark:border-zinc-800 flex justify-between items-center">
                 <h2 className="text-lg font-semibold flex items-center gap-2">
@@ -167,9 +167,9 @@ export default function SimulationPage() {
                 {result && (
                   <span className={cn(
                     "px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider",
-                    result.success ? "bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400" : "bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400"
+                    result.status === "success" ? "bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400" : "bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400"
                   )}>
-                    {result.success ? "Served" : "Blocked"}
+                    {result.status === "success" ? "Served" : "Blocked"}
                   </span>
                 )}
               </div>
@@ -200,7 +200,7 @@ export default function SimulationPage() {
                   </div>
                 )}
 
-                {result?.success === true && (
+                {result?.status === "success" && (
                   <div className="w-full space-y-8 animate-in fade-in zoom-in duration-300">
                     <div className="flex items-center justify-center gap-4 text-green-600 dark:text-green-400 mb-2">
                       <CheckCircle2 size={48} />
@@ -215,13 +215,13 @@ export default function SimulationPage() {
                         <h4 className="text-sm font-semibold uppercase tracking-wider text-zinc-500">Served Advertisement</h4>
                         <div className="relative aspect-video rounded-xl overflow-hidden border border-zinc-200 dark:border-zinc-800 shadow-sm bg-zinc-100 dark:bg-zinc-800">
                           <Image 
-                            src={result.ad.imageUrl} 
+                            src={result.ad.image} 
                             alt="Ad Content" 
                             fill
                             className="object-cover"
                           />
                           <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/80 to-transparent z-10">
-                            <p className="text-white text-xs font-medium">{result.ad.advertiser}</p>
+                            <p className="text-white text-xs font-medium">{result.ad.title}</p>
                           </div>
                         </div>
                       </div>
@@ -229,14 +229,14 @@ export default function SimulationPage() {
                       <div className="space-y-3">
                         <h4 className="text-sm font-semibold uppercase tracking-wider text-zinc-500">Traffic Attestation</h4>
                         <div className="bg-zinc-50 dark:bg-zinc-950 p-4 rounded-xl border border-zinc-200 dark:border-zinc-800 font-mono text-[10px] leading-relaxed overflow-auto max-h-[160px] text-zinc-600 dark:text-zinc-400">
-                          <pre>{result.attestation}</pre>
+                          <pre>{JSON.stringify(result.attestation, null, 2)}</pre>
                         </div>
                       </div>
                     </div>
                   </div>
                 )}
 
-                {result?.success === false && (
+                {result?.status === "blocked" && (
                   <div className="w-full space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-300">
                     <div className="w-20 h-20 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-full flex items-center justify-center mx-auto mb-2">
                       <XCircle size={40} />
