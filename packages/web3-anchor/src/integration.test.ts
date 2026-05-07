@@ -21,8 +21,8 @@ vi.mock('../../ad-server/src/kafka', () => {
   return {
     KafkaManager: vi.fn().mockImplementation(() => ({
       connect: vi.fn().mockResolvedValue(undefined),
-      publishAttestation: vi.fn(),
-      publishImpression: vi.fn(),
+      publishAttestation: vi.fn().mockResolvedValue(undefined),
+      publishImpression: vi.fn().mockResolvedValue(undefined),
     })),
   };
 });
@@ -31,6 +31,7 @@ vi.mock('../../ad-server/src/redis', () => {
   return {
     ScoreStore: vi.fn().mockImplementation(() => ({
       getScore: vi.fn().mockResolvedValue({ overall: 85 }),
+      getConsentStatus: vi.fn().mockResolvedValue(null),
     })),
   };
 });

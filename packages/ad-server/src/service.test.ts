@@ -40,8 +40,14 @@ describe('AdService', () => {
   beforeEach(() => {
     mockScoreStore = new ScoreStore();
     mockKafkaManager = new KafkaManager();
+    // Ensure all async methods return Promises so .catch() works
+    mockScoreStore.getConsentStatus = vi.fn().mockResolvedValue(null);
+    mockKafkaManager.publishAttestation = vi.fn().mockResolvedValue(undefined);
+    mockKafkaManager.publishImpression = vi.fn().mockResolvedValue(undefined);
     adService = new AdService(mockScoreStore, mockKafkaManager);
     adService.setCampaigns([mockCampaign]);
+    // Clear any suspension state carried over from previous tests
+    adService.updatePublisherScore(mockPublisherId, { ...mockScore, overall: 80 });
   });
 
   it('should serve an ad when score is above threshold', async () => {
