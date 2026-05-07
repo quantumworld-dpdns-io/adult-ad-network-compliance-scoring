@@ -5,5 +5,8 @@ export default defineConfig({
     globals: true,
     environment: 'node',
     include: ['packages/*/src/**/*.test.ts', 'packages/*/tests/**/*.test.ts', 'tests/**/*.test.ts'],
+    deps: {
+      inline: ['drizzle-orm'],
+    },
   },
 });
