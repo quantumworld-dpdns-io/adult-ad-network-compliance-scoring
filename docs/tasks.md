@@ -61,9 +61,9 @@ This checklist tracks the implementation phases for the Adult Ad Network with Co
 - [x] AuditLog hash-chain checkpoint anchoring
 
 ## Phase 8 — Dashboards and Notifications (Weeks 22–24)
-- [ ] Advertiser Dashboard (campaign metrics, publisher scores)
-- [ ] Publisher Dashboard (compliance scores, trends, remediation)
-- [ ] Notification system (email + in-platform alerts)
+- [x] Advertiser Dashboard (campaign metrics, publisher scores)
+- [x] Publisher Dashboard (compliance scores, trends, remediation)
+- [x] Notification system (email + in-platform alerts)
 
 ## Phase 9 — Hardening, Performance, and Launch Readiness (Weeks 25–26)
 - [ ] Load testing and chaos testing
