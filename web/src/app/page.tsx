@@ -3,19 +3,18 @@
 import { useState } from "react";
 import { 
   ShieldCheck, 
-  ShieldAlert, 
   Play, 
   CheckCircle2, 
   XCircle, 
   Info, 
   Lock,
-  ChevronRight,
   Activity,
   AlertTriangle
 } from "lucide-react";
 import { publishers, simulateAdRequest, Publisher, AdRequestResult } from "@/lib/mock";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
+import Image from "next/image";
 
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -47,7 +46,7 @@ export default function SimulationPage() {
             Compliance Simulation
           </h1>
           <p className="text-xl text-zinc-600 dark:text-zinc-400 max-w-2xl leading-relaxed">
-            Experience the "Fail-Closed" compliance mechanism. This simulator demonstrates how 
+            Experience the &quot;Fail-Closed&quot; compliance mechanism. This simulator demonstrates how 
             traffic is automatically blocked when publisher scores drop below advertiser requirements, 
             ensuring zero compliance leakage.
           </p>
@@ -215,8 +214,13 @@ export default function SimulationPage() {
                       <div className="space-y-3">
                         <h4 className="text-sm font-semibold uppercase tracking-wider text-zinc-500">Served Advertisement</h4>
                         <div className="relative aspect-video rounded-xl overflow-hidden border border-zinc-200 dark:border-zinc-800 shadow-sm bg-zinc-100 dark:bg-zinc-800">
-                          <img src={result.ad.imageUrl} alt="Ad Content" className="object-cover w-full h-full" />
-                          <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/80 to-transparent">
+                          <Image 
+                            src={result.ad.imageUrl} 
+                            alt="Ad Content" 
+                            fill
+                            className="object-cover"
+                          />
+                          <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/80 to-transparent z-10">
                             <p className="text-white text-xs font-medium">{result.ad.advertiser}</p>
                           </div>
                         </div>

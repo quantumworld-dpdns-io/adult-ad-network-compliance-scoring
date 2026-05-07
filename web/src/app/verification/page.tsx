@@ -25,7 +25,7 @@ interface VerificationResult {
     signature: boolean;
     merkleProof: boolean;
   };
-  raw: any;
+  raw: Record<string, unknown> | null;
 }
 
 export default function VerificationPage() {
@@ -148,7 +148,7 @@ export default function VerificationPage() {
       </div>
 
       {result && (
-        <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+        <div className="space-y-6">
           {result.status === "not_found" ? (
             <div className="bg-amber-50 border border-amber-200 rounded-2xl p-8 text-center">
               <ShieldAlert className="w-12 h-12 text-amber-500 mx-auto mb-4" />
