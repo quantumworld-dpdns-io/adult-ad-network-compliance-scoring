@@ -24,3 +24,10 @@ vendor/
 !.env.example
 /.kiro
 peopose.md
+
+
+# docs
+peopose.md
+.peopose.md
+./peopose.md
+/peopose.md
