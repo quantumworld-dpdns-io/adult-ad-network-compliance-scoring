@@ -1,0 +1,24 @@
+# Netlify configuration for the Demo Frontend
+# This file is placed in the root to manage the monorepo deployment context.
+
+[build]
+  # The directory to change to before starting the build.
+  # This is the 'web' folder containing the Next.js app.
+  base = "web"
+
+  # The command to run to build the Next.js app.
+  # Netlify will run this from the 'base' directory.
+  command = "npm run build"
+
+  # The directory to publish. 
+  # For Next.js (App Router), this is the '.next' folder.
+  publish = ".next"
+
+[build.environment]
+  # Ensure we use a compatible Node version
+  NODE_VERSION = "20"
+
+[[plugins]]
+  # The Netlify Next.js Runtime plugin handles Server-Side Rendering (SSR),
+  # API routes, and other Next.js features automatically.
+  package = "@netlify/plugin-nextjs"
